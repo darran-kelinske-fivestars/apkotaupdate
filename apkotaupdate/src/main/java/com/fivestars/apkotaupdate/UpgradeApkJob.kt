@@ -6,6 +6,12 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.util.Log
 import androidx.work.*
+import com.amazonaws.ClientConfiguration
+import com.amazonaws.auth.AnonymousAWSCredentials
+import com.amazonaws.internal.StaticCredentialsProvider
+import com.amazonaws.regions.Region
+import com.amazonaws.regions.Regions
+import com.amazonaws.services.s3.AmazonS3Client
 import com.fivestars.apkotaupdate.util.ApkUtil
 import com.fivestars.apkotaupdate.util.S3Util
 import com.fivestars.apkotaupdate.data.S3Status
@@ -21,6 +27,10 @@ import kotlin.coroutines.CoroutineContext
 class UpgradeApkJob(appContext: Context, workerParams: WorkerParameters)
     : Worker(appContext, workerParams) , CoroutineScope {
 
+    private val credentialsProvider = StaticCredentialsProvider(AnonymousAWSCredentials())
+    private val region: Region = Region.getRegion(Regions.US_EAST_1)
+    private val s3Client = AmazonS3Client(credentialsProvider, region, ClientConfiguration())
+
     private val job: Job = Job()
 
     override fun doWork(): Result {
@@ -31,12 +41,12 @@ class UpgradeApkJob(appContext: Context, workerParams: WorkerParameters)
         return runBlocking {
 
             val installedApkModifiedDate = getInstalledApkModifiedDate()
-            val latestApkModifiedDate = S3Util.getLatestApkFileDate(apkDetails)
+            val latestApkModifiedDate = S3Util.getLatestApkFileDate(s3Client, apkDetails)
 
             if (installedApkModifiedDate != latestApkModifiedDate) {
                 val channel: Channel<S3Status> = Channel()
                 launch(Dispatchers.IO) {
-                    S3Util.downloadApk(applicationContext, apkDetails, channel)
+                    S3Util.downloadApk(applicationContext, s3Client, apkDetails, channel)
                 }
 
                 channel.consumeEach {

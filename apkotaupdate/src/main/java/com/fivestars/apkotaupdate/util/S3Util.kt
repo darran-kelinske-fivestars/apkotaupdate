@@ -30,7 +30,7 @@ object S3Util {
         return s3ObjectSummary.lastModified.time
     }
 
-    fun downloadApk(s3Client: AmazonS3Client, context: Context, apkConfiguration: ApkConfiguration, channel: SendChannel<S3Status>) {
+    fun downloadApk(context: Context, s3Client: AmazonS3Client, apkConfiguration: ApkConfiguration, channel: SendChannel<S3Status>) {
         val objectListing =
                 s3Client.listObjects(apkConfiguration.bucket, apkConfiguration.prefix)
         val s3ObjectSummary =
