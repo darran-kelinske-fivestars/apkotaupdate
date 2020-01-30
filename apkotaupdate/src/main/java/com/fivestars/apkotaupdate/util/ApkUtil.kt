@@ -39,7 +39,7 @@ object ApkUtil {
         }
         val output = outputStringBuilder.toString()
         p.waitFor()
-        Log.e(LOG_TAG, output.trim { it <= ' ' } + " (" + p.exitValue() + ")")
+        Log.d(LOG_TAG, output.trim { it <= ' ' } + " (" + p.exitValue() + ")")
         return p.exitValue()
     }
 
