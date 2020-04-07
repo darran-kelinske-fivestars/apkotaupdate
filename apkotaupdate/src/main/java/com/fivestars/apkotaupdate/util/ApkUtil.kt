@@ -68,7 +68,6 @@ object ApkUtil {
     fun uninstallApk(filename: String): Result<String> {
         Log.d(LOG_TAG, "Uninstalling package: $filename")
 
-        // Install the new apk over the old apk via "pm install -r"
         val command = libs + "pm uninstall " + filename
         Log.d(LOG_TAG, "Executing command 1: $command")
 
